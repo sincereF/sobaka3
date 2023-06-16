@@ -1,0 +1,410 @@
+git clone https://github.com/cannlz/site
+
+https://dropmefiles.com/ftbXm
+
+
+AssemblyInfo.cs
+
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+[assembly: AssemblyTitle("UnitTestProject1")]
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("UnitTestProject1")]
+[assembly: AssemblyCopyright("Copyright ©  2023")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
+
+[assembly: ComVisible(false)]
+
+[assembly: Guid("fc26b338-5577-4b87-be8b-5357c76b1cdc")]
+
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
+
+
+
+
+UnitTest1.cs
+
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+
+namespace UnitTestProject1
+{
+    [TestClass]
+    public class UnitTest1
+    {
+        [TestMethod]
+        public void TestMethod1()
+        {
+            string a = "1";
+            string query = "SELECT Id_client FROM clients WHERE Id_client="+a;
+            test_demo.db_connect db_Connect = new test_demo.db_connect();
+            string result = db_Connect.db_select(query);
+            
+            Assert.AreEqual(a, result);
+        }
+    }
+}
+
+
+
+
+db_add_user.cs
+
+using System;
+using System.Collections.Generic;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+
+namespace test_demo.classes
+{
+    public class db_add_user
+    {
+        public string db_add_users(string client_code)
+        {
+            string sqlqueryanswer = "None";
+            string connectionString = "Data Source=DELOWERPC;Initial Catalog=TestDemo;Integrated Security=True";
+            try
+            {
+                SqlConnection connection = new SqlConnection(connectionString);
+                connection.Open();
+                string sqlqueryvalue = $"SELECT order_status FROM Orders WHERE code_client_fl={client_code}";
+                SqlCommand querycommand = new SqlCommand(sqlqueryvalue, connection);
+                SqlDataReader reader = querycommand.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    sqlqueryanswer = Convert.ToString(reader["order_status"]);
+                }
+                connection.Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ошибка с запрсом: " + ex);
+            }
+            return sqlqueryanswer;
+        }
+    }
+}
+
+
+
+
+
+
+db_check_valid.cs
+
+using System;
+using System.Collections.Generic;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+
+namespace test_demo.classes
+{
+    public class db_check_valid
+    {
+        public string db_check_valid_data(int client_code)
+        {
+            string sqlqueryanswer = "test";
+            string connectionString = "Data Source=DELOWERPC;Initial Catalog=TestDemo;Integrated Security=True";
+            try
+            {
+                SqlConnection connection = new SqlConnection(connectionString);
+                connection.Open();
+                string sqlqueryvalue = $"SELECT order_status FROM Orders WHERE code_client_fl={client_code}";
+                SqlCommand querycommand = new SqlCommand(sqlqueryvalue, connection);
+                SqlDataReader reader = querycommand.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    sqlqueryanswer = Convert.ToString(reader["order_status"]);
+                }
+                connection.Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ошибка с запрсом: " + ex);
+            }
+            return sqlqueryanswer;
+        }
+    }
+}
+
+
+
+
+db_connect.cs
+
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Data.SqlClient;
+using System.Data.SqlTypes;
+using System.Data;
+using System.Windows.Controls;
+using System.Runtime.Remoting.Messaging;
+using System.Windows;
+
+namespace test_demo
+{
+    public class db_connect
+    {
+        public int db_zakaz_check()
+        {
+            int sqlqueryanswer = 0;
+            string connectionString = "Data Source=DELOWERPC;Initial Catalog=TestDemo;Integrated Security=True";
+            try
+            {
+                SqlConnection connection = new SqlConnection(connectionString);
+                connection.Open();
+                string sqlqueryvalue = "SELECT MAX(code_client_fl) AS max_score FROM Orders";
+                SqlCommand querycommand = new SqlCommand(sqlqueryvalue, connection);
+                SqlDataReader reader = querycommand.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    sqlqueryanswer = Convert.ToInt32(reader["max_score"]);
+                }
+                connection.Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ошибка с запрсом: " + ex);
+            }
+            return sqlqueryanswer;
+        }
+    }
+}
+
+
+
+
+WindowTask.xaml.cs
+
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Runtime.Remoting.Messaging;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
+using test_demo.classes;
+using test_demo.pages;
+
+namespace test_demo
+{
+    /// <summary>
+    /// Логика взаимодействия для MainWindow.xaml
+    /// </summary>
+    public partial class WindowTask : Window
+    {
+    /// <summary>
+    /// Создание глобально переменной и подключение к бд
+    /// </summary>
+    /// 
+        public int number_sosud;
+
+        public WindowTask()
+        {
+            InitializeComponent();
+            try
+            {
+                db_connect databasequery = new db_connect();
+                number_sosud = databasequery.db_zakaz_check();
+                number_sosud++;
+                textCodeSosud.Text = number_sosud.ToString();
+                textCodeSosud.Foreground = Brushes.Gray;
+            }
+            catch (Exception ex)
+            {
+                // Обработка ошибок подключения
+                MessageBox.Show("Ошибка подключения: " + ex.Message);
+            }
+        }
+        private void bntAdd_Click(object sender, RoutedEventArgs e)
+        {
+            if (MessageBox.Show("Вы уверенны?", "Внимание", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
+            {
+                number_sosud = Convert.ToInt32(textCodeSosud.Text);
+                db_check_valid db_valid_data = new db_check_valid();
+                string check_valid_data = db_valid_data.db_check_valid_data(number_sosud);
+                if (check_valid_data != "Новая" || check_valid_data != "На исследовании")
+                {
+                   frame_pages.Visibility = Visibility.Visible;
+                   page_select_zakazchik page_zakazchik = new page_select_zakazchik();
+                   frame_pages.Navigate(page_zakazchik);
+                }
+                else
+                {
+                    MessageBox.Show("Данный номер заказа не подходит, выберете другой");
+                }
+            }
+        }
+
+        private void textCodeSosud_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            // Проверяем, нажата ли клавиша Tab
+            if (e.Key == Key.Enter && textCodeSosud.Text == number_sosud.ToString())
+            {
+                textCodeSosud.Foreground = Brushes.Black;
+                textCodeSosud.Text = number_sosud.ToString();
+            }
+        }
+
+        private void textCodeSosud_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            if (textCodeSosud != null && textCodeSosud.Text == number_sosud.ToString() && textCodeSosud.Foreground == Brushes.Gray)
+            {
+                textCodeSosud.SelectAll();
+                textCodeSosud.Foreground = Brushes.Black;
+            }
+        }
+    }
+}
+
+
+page_select_zakazchik.xaml.cs
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
+using test_demo.classes;
+
+namespace test_demo.pages
+{
+    /// <summary>
+    /// Логика взаимодействия для page_select_zakazchik.xaml
+    /// </summary>
+    public partial class page_select_zakazchik : Page
+    {
+        public page_select_zakazchik()
+        {
+            InitializeComponent();
+        }
+
+        private void radioUL_Checked(object sender, RoutedEventArgs e)
+        {
+            if (radioUL.IsChecked == true)
+            {
+                db_add_user db_add = new db_add_user();
+                string answerDB = db_add.db_add_users(textNameCompany.Text);
+                grid_company.Visibility = Visibility.Visible;
+                grid_fio.Visibility = Visibility.Hidden;
+            }
+        }
+
+        private void radioFL_Checked(object sender, RoutedEventArgs e)
+        {
+            if (radioFL.IsChecked == true)
+            {
+                grid_company.Visibility = Visibility.Hidden;
+                grid_fio.Visibility = Visibility.Visible;
+            }
+        }
+    }
+}
+
+
+
+
+---
+<Page x:Class="test_demo.pages.page_select_zakazchik"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:test_demo.pages"
+      mc:Ignorable="d"
+      Title="page_select_zakazchik" Height="500" Width="500" MinHeight="400" MinWidth="500">
+
+    <Grid Height="500" Width="500" MinHeight="400" MinWidth="500" Background="#FFA0A0A0">
+        <RadioButton x:Name="radioUL" FontSize="20" Content="Юридическое лицо" Margin="278,70,0,392" Checked="radioUL_Checked"/>
+        <RadioButton x:Name="radioFL" FontSize="20" Content="Физичесое лицо" Margin="17,71,279,405" RenderTransformOrigin="0.5,0.5" Checked="radioFL_Checked">
+            <RadioButton.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform/>
+                    <SkewTransform AngleY="-0.326"/>
+                    <RotateTransform/>
+                    <TranslateTransform Y="-0.328"/>
+                </TransformGroup>
+            </RadioButton.RenderTransform>
+        </RadioButton>
+        <Button x:Name="btn_continue" Content="Подтвердить" FontSize="20" HorizontalAlignment="Center" Margin="0,431,0,0" VerticalAlignment="Top" Height="43" Width="200"/>
+        <Label Content="Заполнение данных" FontSize="25" HorizontalAlignment="Center" Height="42" Margin="0,10,0,0" VerticalAlignment="Top" Width="242"/>
+        <TextBox x:Name="textusluga" HorizontalAlignment="Center" FontSize="17" Height="39" Margin="0,329,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="236"/>
+        <Label Content="Введите название услуги" FontSize="20" HorizontalAlignment="Center" Height="42" Margin="0,286,0,0" VerticalAlignment="Top" Width="236"/>
+        <Grid x:Name="grid_fio" Margin="10,125,270,278">
+            <Label Content="Введите ваше ФИО" FontSize="20" HorizontalAlignment="Left" Height="42" Margin="10,10,0,0" VerticalAlignment="Top" Width="197"/>
+            <TextBox x:Name="textFIO" HorizontalAlignment="Left" FontSize="17" Height="39" Margin="10,52,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="197"/>
+        </Grid>
+        <Grid x:Name="grid_company" Margin="278,125,10,272">
+            <Label Content="Название компании" FontSize="20" HorizontalAlignment="Left" Height="39" Margin="10,10,0,0" VerticalAlignment="Top" Width="200"/>
+            <TextBox x:Name="textNameCompany" HorizontalAlignment="Left" FontSize="17" Height="39" Margin="10,49,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="200"/>
+        </Grid>
+    </Grid>
+</Page>
+---
+
+
+
+-----
+<Window x:Name="windowCreate_order" x:Class="test_demo.WindowTask"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:test_demo"
+        mc:Ignorable="d"
+        Title="Формирование заказа" WindowStartupLocation="CenterScreen" Height="500" Width="500" MinHeight="400" MinWidth="500">
+    <Grid Background="#FFA0A0A0">
+        <Viewbox Margin="2,1,2,1">
+            <Grid Height="500" Width="500">
+                <Image x:Name="imageBox" Source="/images/logo.png" Stretch="UniformToFill" Margin="136,16,130,256"/>
+                <Label x:Name="labelmainPage" Content="Введите код сосуда" FontSize="35" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Margin="0,280,0,165" Width="400"/>
+                <TextBox x:Name="textCodeSosud" FontSize="35" TextWrapping="Wrap" Margin="0,340,0,0" PreviewKeyDown="textCodeSosud_PreviewKeyDown" HorizontalAlignment="Center" VerticalAlignment="Top" Width="400" PreviewTextInput="textCodeSosud_PreviewTextInput" Height="60"/>
+                <Button x:Name="bntAdd" TabIndex="0" FontSize="25" Content="Добавить код сосуда" Click="bntAdd_Click" Background="White" Margin="50,430,45,10"/>
+                <Frame x:Name="frame_pages" Visibility="Hidden" Content="" NavigationUIVisibility="Hidden"/>
+            </Grid>
+        </Viewbox>
+
+    </Grid>
+</Window>
+--
+
